@@ -8,7 +8,7 @@ export default function Home() {
   const router = useRouter();
   const [testQuestions, setTestQuestions] = useState<string[]>([]);
   const [testTime, setTestTime] = useState(1);
-  const [warning, setWarning] = useState("");
+  const [warning, setWarning] = useState({ question: "", time: "" });
   const { setQuestions, setTime } = useTestQuestions();
 
   const handleQuestionsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -20,22 +20,33 @@ export default function Home() {
       .filter(Boolean);
     setTestQuestions(questionsArray);
 
-    if (questionsArray.length > 0) setWarning("");
+    if (questionsArray.length > 0) setWarning((prev) => ({ ...prev, question: "" }));
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
 
     setTestTime(value);
+    if (value > 0) setWarning((prev) => ({ ...prev, time: "" }));
   };
 
   const handleclick = () => {
     if (testQuestions.length === 0) {
-      setWarning("Please enter at least one question.");
+      setWarning((prev) => ({
+        ...prev,
+        question: "Please enter at least one question.",
+      }));
+      return;
+    }
+    if (testTime <= 0) {
+      setWarning((prev) => ({
+        ...prev,
+        time: "Please enter a valid time.",
+      }));
       return;
     }
 
-    setWarning("");
+    setWarning((prev) => ({ ...prev, question: "", time: "" }));
     setQuestions(testQuestions);
     setTime(testTime);
     router.push("/taketest");
@@ -53,7 +64,7 @@ export default function Home() {
             placeholder="kind,good,rich..."
             onChange={handleQuestionsChange}
           />
-          {warning && <div className="text-red-500 mt-2">{warning}</div>}
+          {warning && <div className="text-red-500 mt-2">{warning.question}</div>}
         </div>
 
         <div className="md:col-span-2">
@@ -66,6 +77,7 @@ export default function Home() {
             defaultValue={1}
             onChange={handleTimeChange}
           />
+          {warning && <div className="text-red-500 mt-2">{warning.time}</div>}
         </div>
 
         <div className="flex justify-end md:col-span-6 mt-4">
